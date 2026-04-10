@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Optimizing Agentic LM Inference via Speculative Tool Calls</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #e74c3c;
+            --bg-color: #f4f6f9;
+            --text-color: #333;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #333;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 40px;
+        }
+
+        .slide {
+            width: 1280px;
+            height: 720px;
+            background-color: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-sizing: border-box;
+            padding: 30px;
+        }
+
+        header {
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin: 0 0 8px 0;
+            font-size: 28px;
+            line-height: 1.2;
+        }
+
+        h2 {
+            color: var(--primary-color);
+            margin: 0 0 8px 0;
+            font-size: 24px;
+            line-height: 1.2;
+        }
+
+        .meta-info {
+            color: #666;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .main-content {
+            display: flex;
+            flex: 1;
+            gap: 30px;
+            min-height: 0;
+        }
+
+        .full-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .section-title {
+            font-size: 20px;
+            color: var(--primary-color);
+            border-left: 5px solid var(--accent-color);
+            padding-left: 10px;
+            margin: 0 0 12px 0;
+            font-weight: bold;
+        }
+
+        .subsection {
+            margin-bottom: 15px;
+        }
+
+        .subsection h3 {
+            font-size: 18px;
+            color: var(--primary-color);
+            border-left: 4px solid var(--accent-color);
+            padding-left: 8px;
+            margin: 0 0 8px 0;
+        }
+
+        .content-text {
+            font-size: 16px;
+            line-height: 1.5;
+            color: var(--text-color);
+        }
+
+        .content-text ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .content-text li {
+            margin-bottom: 8px;
+        }
+
+        strong {
+            color: #000;
+            font-weight: 700;
+        }
+
+        .img-container {
+            width: 100%;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+
+        .img-container img {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            display: block;
+        }
+
+        .img-caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.98);
+            padding: 8px 10px;
+            font-size: 12px;
+            line-height: 1.4;
+            border-top: 1px solid var(--primary-color);
+            z-index: 10;
+            text-align: center;
+            color: var(--text-color);
+        }
+
+        .img-caption strong {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .img-container-full {
+            width: 100%;
+            height: 100%;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+
+        .img-container-full img {
+            flex: 1;
+            max-width: 100%;
+            max-height: calc(100% - 40px);
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            display: block;
+        }
+
+        .img-container-full .img-caption {
+            position: relative;
+            margin-top: 8px;
+            padding: 6px 8px;
+            background: rgba(255, 255, 255, 0.95);
+            border-top: 1px solid #ddd;
+        }
+
+        .title-slide {
+            text-align: center;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .title-slide .main-content {
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .title-slide h1 {
+            font-size: 32px;
+            margin-bottom: 15px;
+        }
+
+        .title-slide .meta-info {
+            font-size: 18px;
+            margin-top: 20px;
+        }
+
+        /* Code block style */
+        .code-block {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            border-radius: 8px;
+            padding: 16px 20px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            overflow: auto;
+        }
+        .code-block .keyword { color: #569cd6; }
+        .code-block .string { color: #ce9178; }
+        .code-block .comment { color: #6a9955; }
+        .code-block .field { color: #9cdcfe; }
+        .code-block .type { color: #4ec9b0; }
+
+        /* Key takeaway box */
+        .takeaway-box {
+            background: #eef2f7;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .takeaway-box p {
+            margin: 0;
+            font-size: 18px;
+            color: var(--primary-color);
+            text-align: center;
+        }
+
+        /* Formula styling */
+        .formula {
+            font-family: 'Times New Roman', serif;
+            font-size: 18px;
+            text-align: center;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border: 1px solid #e0e0e0;
+            margin: 8px 0;
+        }
+
+        @media print {
+            @page {
+                size: 1280px 720px;
+                margin: 0;
+            }
+            body {
+                background-color: white;
+                padding: 0;
+                margin: 0;
+                display: block;
+            }
+            .slide {
+                margin: 0 !important;
+                box-shadow: none !important;
+                break-after: page;
+                page-break-after: always;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .main-content {
+                height: calc(720px - 100px);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Slide 1: Title -->
+    <div class="slide title-slide">
+        <div class="main-content">
+            <h1>Optimizing Agentic Language Model Inference<br>via Speculative Tool Calls</h1>
+            <div class="meta-info" style="margin-top: 30px; font-size: 18px; line-height: 1.8;">
+                <div style="margin-bottom: 15px; text-align: center;">
+                    <p style="margin: 5px 0;">Daniel Nichols<sup>1,2</sup>, Prajwal Singhania<sup>2</sup>, Charles Jekel<sup>2</sup>, Abhinav Bhatele<sup>1</sup>, Harshitha Menon<sup>2</sup></p>
+                </div>
+                <div style="margin-top: 20px; font-size: 16px; text-align: center;">
+                    <p style="margin: 3px 0;"><sup>1</sup>University of Maryland &nbsp;&nbsp;&nbsp; <sup>2</sup>Lawrence Livermore National Laboratory</p>
+                </div>
+                <div style="margin-top: 40px; font-size: 16px; color: #999; text-align: center;">
+                    Presented by [Presenter] | April 2026
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 2: Motivation -->
+    <div class="slide">
+        <header>
+            <h2>Motivation: Tool Calling is an Inference Bottleneck</h2>
+        </header>
+        <div class="main-content">
+            <div class="column">
+                <div class="section-title">Why This Matters</div>
+                <div class="content-text">
+                    <ul>
+                        <li><strong>LM agents rely heavily on tools</strong> (file search, code execution, web search, APIs). Each tool call <strong>breaks generation</strong> into fragmented requests.</li>
+                        <li><strong>Sequential dependency:</strong> model generates &rarr; stops &rarr; client runs tool &rarr; sends result back &rarr; engine re-prefills. Latencies accumulate across turns.</li>
+                        <li><strong>Eviction overhead:</strong> sequences are removed from the active batch during tool execution. KV-cache may be discarded. Re-scheduling and re-prefilling grow with prompt length.</li>
+                        <li><strong>Multi-tenant contention:</strong> many concurrent agents compete for KV-cache slots; prefix-caching becomes less effective under load.</li>
+                        <li><strong>Existing mitigations are limited:</strong> parallel tool calls require model support & sequential tools are excluded; prefix caching doesn't eliminate eviction or re-scheduling costs.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="column">
+                <div class="img-container-full" style="flex: 1; min-height: 0;">
+                    <img src="good-examples/2512.15834/figs/results-overview.png" alt="Results Overview">
+                    <div class="img-caption"><strong>Headline Result:</strong> Up to 196 tok/s throughput improvement with 32 concurrent gpt-oss-120b agents on vLLM.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 3: Background - Tool Calling Pipeline -->
+    <div class="slide">
+        <header>
+            <h2>Background: The Tool Calling Pipeline</h2>
+        </header>
+        <div class="main-content">
+            <div class="full-content">
+                <div class="section-title">Standard Inference Cycle with Tools</div>
+                <div class="content-text" style="margin-bottom: 12px;">
+                    <ul>
+                        <li><strong>Prefill phase:</strong> Engine processes all prompt tokens to produce the first output token (compute-bound).</li>
+                        <li><strong>Decode phase:</strong> Auto-regressive generation of subsequent tokens until a stop or tool-call token (memory-bound).</li>
+                        <li><strong>Tool execution:</strong> Generation halts; sequence evicted from batch; client runs tool externally (0.1s - minutes).</li>
+                        <li><strong>Re-entry:</strong> Client submits new request = original prompt + intermediate text + tool output &rarr; engine must re-prefill the growing history before decoding again.</li>
+                    </ul>
+                </div>
+                <div style="display: flex; gap: 20px; flex: 1; min-height: 0;">
+                    <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+                        <div style="background: #f8f9fa; border-radius: 8px; padding: 18px; border: 1px solid #ddd;">
+                            <div style="font-size: 15px; font-weight: bold; color: var(--primary-color); margin-bottom: 12px; text-align: center;">Timeline: Agent Turn with Tool Call</div>
+                            <div style="display: flex; align-items: center; gap: 4px; font-size: 13px; font-family: monospace;">
+                                <div style="background: #3498db; color: white; padding: 8px 12px; border-radius: 4px; text-align: center;">Prefill<br><span style="font-size:11px">process prompt</span></div>
+                                <div style="font-size: 18px; color: #999;">&rarr;</div>
+                                <div style="background: #2ecc71; color: white; padding: 8px 12px; border-radius: 4px; text-align: center;">Decode<br><span style="font-size:11px">generate tokens</span></div>
+                                <div style="font-size: 18px; color: #999;">&rarr;</div>
+                                <div style="background: #e74c3c; color: white; padding: 8px 16px; border-radius: 4px; text-align: center;">Tool Call<br><span style="font-size:11px">evict + wait</span></div>
+                                <div style="font-size: 18px; color: #999;">&rarr;</div>
+                                <div style="background: #f39c12; color: white; padding: 8px 12px; border-radius: 4px; text-align: center;">Re-Prefill<br><span style="font-size:11px">history + tool output</span></div>
+                                <div style="font-size: 18px; color: #999;">&rarr;</div>
+                                <div style="background: #2ecc71; color: white; padding: 8px 12px; border-radius: 4px; text-align: center;">Decode<br><span style="font-size:11px">continue gen</span></div>
+                            </div>
+                            <div style="margin-top: 10px; font-size: 13px; color: #666; text-align: center;">Repeated for every tool call in multi-step agent tasks &mdash; prompt length grows each turn</div>
+                        </div>
+                    </div>
+                    <div style="flex: 1; display: flex; flex-direction: column; justify-content: center;">
+                        <div class="section-title" style="font-size: 18px;">Existing Partial Solutions</div>
+                        <div class="content-text" style="font-size: 15px;">
+                            <ul>
+                                <li><strong>Parallel tool calls:</strong> model emits multiple tools in one turn &rarr; reduces round-trips, but requires model training & can't handle dependent tools.</li>
+                                <li><strong>Prefix caching:</strong> reuses KV-cache for repeated prefixes &rarr; cuts re-prefill cost, but doesn't eliminate eviction, re-scheduling, or multi-tenant cache pressure.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 4: Speculative Decoding vs Speculative Tool Calling -->
+    <div class="slide">
+        <header>
+            <h2>Key Insight: Speculative Decoding vs. Speculative Tool Calling</h2>
+        </header>
+        <div class="main-content">
+            <div class="column">
+                <div class="section-title">Speculative Decoding (Background)</div>
+                <div class="content-text">
+                    <ul>
+                        <li>A small <strong>draft model</strong> proposes several tokens ahead of the target model.</li>
+                        <li>Target model <strong>validates in a single forward pass</strong>; accepted tokens are "free".</li>
+                        <li>Typically only <strong>3-10 tokens</strong> ahead &rarr; saves milliseconds per step.</li>
+                        <li>Useful for turning memory-bound decode into compute-bound verification.</li>
+                    </ul>
+                </div>
+                <div class="section-title" style="margin-top: 20px;">Limitation for Tool Calling</div>
+                <div class="content-text">
+                    <ul>
+                        <li>If we launch tools as the draft generates them, we only overlap tool calls with <strong>a few generated tokens</strong> &mdash; milliseconds of savings, dominated by tool latency.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="column">
+                <div class="section-title">Speculative Tool Calling (This Paper)</div>
+                <div class="content-text">
+                    <ul>
+                        <li>Instead of speculating individual tokens, speculate the <strong>entire tool call</strong> (function name + arguments) early.</li>
+                        <li>Launch the tool <strong>asynchronously</strong> while the main model is still generating &rarr; overlap tool execution with generation.</li>
+                        <li>Potential savings: <strong>seconds</strong> (tool latency) instead of milliseconds.</li>
+                        <li>Key difference: speculate <strong>as soon as possible</strong> and, for stateless/cheap tools, <strong>as many times as possible</strong>.</li>
+                    </ul>
+                </div>
+                <div style="background: #eef2f7; padding: 12px; border-radius: 8px; border-left: 5px solid var(--accent-color); margin-top: 15px;">
+                    <p style="margin: 0; font-size: 15px; color: var(--primary-color);">
+                        <strong>Core idea:</strong> Use a small, fast model to predict which tool the main model will call, then pre-execute it to hide latency.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 5: Client-side Algorithm -->
+    <div class="slide">
+        <header>
+            <h2>Client-side Speculative Tool Calling</h2>
+        </header>
+        <div class="main-content">
+            <div class="column" style="flex: 1.1;">
+                <div class="section-title">Algorithm Overview</div>
+                <div class="content-text" style="font-size: 15px;">
+                    <ul>
+                        <li><strong>Step 1:</strong> Send prompt to main model M and speculative model S <strong>in parallel</strong>.</li>
+                        <li><strong>Step 2:</strong> S returns a tool prediction (faster, smaller). <strong>Launch tool asynchronously</strong> and store future in a tool cache.</li>
+                        <li><strong>Step 3:</strong> M returns. If it called the same tool &rarr; <strong>cache hit</strong>: await the pre-launched future instead of re-executing.</li>
+                        <li><strong>Step 4:</strong> If cache miss &rarr; fall back to normal tool execution.</li>
+                    </ul>
+                </div>
+                <div class="section-title" style="margin-top: 15px;">Key Properties</div>
+                <div class="content-text" style="font-size: 15px;">
+                    <ul>
+                        <li><strong>Works with ANY unmodified API</strong> &mdash; no engine changes needed. Purely client-side.</li>
+                        <li>Can run <strong>&lambda; speculative samples</strong> in parallel to boost hit rate.</li>
+                        <li>Only applicable to <strong>stateless, cheap tools</strong> (web search, file read, etc.).</li>
+                        <li>Multiple speculation samples: smaller models + more samples &asymp; larger model accuracy.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="column" style="flex: 0.9;">
+                <div class="img-container-full" style="flex: 1; min-height: 0;">
+                    <img src="good-examples/2512.15834/figs/client-side.png" alt="Client-side Algorithm Overview">
+                    <div class="img-caption"><strong>Figure:</strong> Client-side approach. Speculate tool calls and overlap their execution with main model generation.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 6: Client-side Theoretical Analysis -->
+    <div class="slide">
+        <header>
+            <h2>Client-side Analysis: Speedup Bound</h2>
+        </header>
+        <div class="main-content">
+            <div class="column">
+                <div class="section-title">Runtime Model</div>
+                <div class="content-text" style="font-size: 15px;">
+                    <p style="margin: 0 0 8px 0;">For N repeated agent turns:</p>
+                </div>
+                <div class="formula" style="font-size: 16px;">
+                    T<sub>standard</sub> = N (G + T)<br><br>
+                    T<sub>spec</sub> = &alpha;N &middot; max{G, g+T} + (1-&alpha;)N(G+T)
+                </div>
+                <div class="content-text" style="font-size: 14px; margin-top: 8px;">
+                    <ul>
+                        <li><strong>G</strong> = avg main model generation time</li>
+                        <li><strong>g</strong> = avg speculative model generation time</li>
+                        <li><strong>T</strong> = avg tool call duration</li>
+                        <li><strong>&alpha;</strong> = speculative model acceptance rate</li>
+                    </ul>
+                </div>
+                <div class="section-title" style="margin-top: 12px; font-size: 18px;">Lemma: S<sub>spec</sub> &lt; 2</div>
+                <div class="content-text" style="font-size: 14px;">
+                    <ul>
+                        <li>Speedup is <strong>strictly increasing</strong> in &alpha; &rarr; any &alpha; > 0 helps.</li>
+                        <li><strong>Maximum speedup approaches 2&times;</strong> as g &rarr; 0 but never reaches it.</li>
+                        <li>Conditions for speedup: <strong>&alpha; > 0</strong> and <strong>g < G</strong> (S is faster than M).</li>
+                        <li>Best gains when <strong>T &asymp; G</strong> (tool latency similar to generation time).</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="column">
+                <div class="img-container-full" style="flex: 1; min-height: 0;">
+                    <img src="good-examples/2512.15834/figs/client-side-spec-model-speedup-heatmap.png" alt="Speedup Heatmap">
+                    <div class="img-caption"><strong>Speedup heatmap</strong> across acceptance rate &alpha;, generation time ratio g/G, and tool latency T. Best speedups at T&asymp;G, &alpha;&gt;0.5, g/G&lt;0.5.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 7: Engine-side Algorithm -->
+    <div class="slide">
+        <header>
+            <h2>Engine-side Speculative Tool Calling</h2>
+        </header>
+        <div class="main-content">
+            <div class="column" style="flex: 1.1;">
+                <div class="section-title">Three Optimizations (O1 + O2 + O3)</div>
+                <div class="content-text" style="font-size: 15px;">
+                    <ul>
+                        <li><strong>O1 - Speculate tools:</strong> Same as client-side &mdash; speculative model predicts tools, client launches them async. Results are <strong>posted to the engine's tool cache</strong>.</li>
+                        <li><strong>O2 - Early exit decoding:</strong> When engine detects a tool-call-start token, it looks up the cache. If found, cached tool call tokens are injected as <strong>draft tokens</strong> and validated via <strong>speculative sampling</strong> in one forward pass. Avoids generating tool call argument tokens one-by-one.</li>
+                        <li><strong>O3 - Avoid eviction:</strong> When tool-call-end token is detected and cache has the result, <strong>append tool output directly to KV-cache</strong>. No eviction, no re-scheduling, no re-prefill of growing history.</li>
+                    </ul>
+                </div>
+                <div style="background: #eef2f7; padding: 10px; border-radius: 8px; border-left: 5px solid var(--accent-color); margin-top: 10px;">
+                    <p style="margin: 0; font-size: 14px; color: var(--primary-color);">
+                        <strong>Requires engine modifications</strong> (implemented in custom vLLM fork), but yields additional savings on top of client-side approach.
+                    </p>
+                </div>
+            </div>
+            <div class="column" style="flex: 0.9;">
+                <div class="img-container-full" style="flex: 1; min-height: 0;">
+                    <img src="good-examples/2512.15834/figs/engine-side.png" alt="Engine-side Algorithm Overview">
+                    <div class="img-caption"><strong>Figure:</strong> Engine-side approach with three optimizations: speculate tools (O1), early exit via speculative sampling (O2), and avoid eviction (O3).</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 8: Engine-side Analysis -->
+    <div class="slide">
+        <header>
+            <h2>Engine-side Analysis: Runtime Equations</h2>
+        </header>
+        <div class="main-content">
+            <div class="full-content">
+                <div style="display: flex; gap: 25px; flex: 1; min-height: 0;">
+                    <div style="flex: 1; display: flex; flex-direction: column;">
+                        <div class="section-title">Vanilla Runtime (K agent turns)</div>
+                        <div class="formula" style="font-size: 15px; padding: 12px; text-align: left;">
+                            T<sub>vanilla</sub> = 2Ko + &phi; &Sigma; X<sub>i</sub> + &delta; &Sigma;(R<sub>i</sub> + t<sub>i</sub>) + &Sigma; T<sub>i</sub>
+                        </div>
+                        <div class="content-text" style="font-size: 14px;">
+                            <ul>
+                                <li><strong>o</strong> = API & eviction overhead per turn</li>
+                                <li><strong>&phi;</strong> = prefill rate (s/tok)</li>
+                                <li><strong>&delta;</strong> = decode rate (s/tok)</li>
+                                <li><strong>R<sub>i</sub></strong> = reasoning tokens, <strong>t<sub>i</sub></strong> = tool call tokens</li>
+                                <li><strong>T<sub>i</sub></strong> = tool execution duration</li>
+                            </ul>
+                        </div>
+
+                        <div class="section-title" style="margin-top: 12px;">With Prefix Caching</div>
+                        <div class="formula" style="font-size: 14px; padding: 10px; text-align: left;">
+                            T<sub>cached</sub> = 2Ko + &phi;(X<sub>1</sub> + &Sigma;(t<sub>i</sub>+t<sub>o,i</sub>)) + &delta;&Sigma;(R<sub>i</sub>+t<sub>i</sub>) + &Sigma;T<sub>i</sub>
+                        </div>
+                    </div>
+                    <div style="flex: 1; display: flex; flex-direction: column;">
+                        <div class="section-title">With Speculation (&alpha; accuracy)</div>
+                        <div class="formula" style="font-size: 14px; padding: 12px; text-align: left;">
+                            T*<sub>spec</sub> = (1-&alpha;)2Ko + &phi;(X<sub>1</sub> + &Sigma;(t<sub>i</sub>+t<sub>o,i</sub>))<br>
+                            &nbsp;&nbsp;+ &delta;(&alpha;K + &Sigma;R<sub>i</sub> + (1-&alpha;)&Sigma;t<sub>i</sub>) + (1-&alpha;)&Sigma;T<sub>i</sub>
+                        </div>
+                        <div class="content-text" style="font-size: 14px;">
+                            <ul>
+                                <li>At &alpha;=1 saves: <strong>2Ko</strong> (overhead) + <strong>&delta;(&Sigma;t<sub>i</sub>-K)</strong> (decode) + <strong>&Sigma;T<sub>i</sub></strong> (tool latency)</li>
+                                <li>Reduces to T<sub>cached</sub> when &alpha;=0 (no speculation)</li>
+                            </ul>
+                        </div>
+
+                        <div class="section-title" style="margin-top: 15px;">Key Insight</div>
+                        <div style="background: #eef2f7; padding: 12px; border-radius: 8px; border-left: 5px solid var(--accent-color);">
+                            <div class="content-text" style="font-size: 14px;">
+                                <ul style="margin: 0;">
+                                    <li><strong>Optimal when T<sub>i</sub> &lt; &delta;R<sub>i</sub></strong> &mdash; tool finishes before reasoning phase ends, so result is ready for O2 & O3.</li>
+                                    <li>Best speedup at <strong>T<sub>i</sub> &asymp; &delta;R<sub>i</sub></strong> &mdash; masks entire tool call + saves most decode steps.</li>
+                                    <li>SOTA reasoning models have seconds-to-minutes reasoning traces &mdash; many common tools (ls, web search, file read) fall in this window.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 9: Tool Cache API -->
+    <div class="slide">
+        <header>
+            <h2>Proposed Tool Cache API</h2>
+        </header>
+        <div class="main-content">
+            <div class="full-content">
+                <div class="section-title">POST /cache-tool-output/{response_id}</div>
+                <div class="content-text" style="margin-bottom: 12px; font-size: 15px;">
+                    <p style="margin: 0;">A simple API endpoint for providers to adopt engine-side speculation. Clients post speculated tool outputs; engine uses them to keep sequences resident.</p>
+                </div>
+                <div class="code-block" style="flex: 1;">
+<span class="comment">// POST /cache-tool-output/{response_id}</span>
+<span class="comment">// Request body: JSON array of tool cache entries</span>
+
+[
+  {
+    <span class="field">"name"</span>:       <span class="string">"web_search"</span>,          <span class="comment">// required - tool name as cache key</span>
+    <span class="field">"params"</span>:     {                        <span class="comment">// optional - canonicalized arguments</span>
+      <span class="field">"query"</span>: <span class="string">"latest CUDA version"</span>
+    },
+    <span class="field">"output"</span>:     <span class="string">"CUDA 12.9 released..."</span>, <span class="comment">// required - serialized tool output</span>
+    <span class="field">"keep_alive"</span>: <span class="type">30</span>                       <span class="comment">// optional - TTL in seconds</span>
+  }
+]
+
+<span class="comment">// Response</span>
+<span class="type">200 OK</span>
+{
+  <span class="field">"cached"</span>: <span class="type">1</span>    <span class="comment">// number of entries accepted</span>
+}
+                </div>
+                <div style="display: flex; gap: 25px; margin-top: 15px;">
+                    <div style="flex: 1;">
+                        <div class="section-title" style="font-size: 17px;">Provider Incentives</div>
+                        <div class="content-text" style="font-size: 14px;">
+                            <ul>
+                                <li>Reduces inference time per request &rarr; <strong>higher throughput</strong></li>
+                                <li>Fewer eviction/re-prefill cycles &rarr; <strong>better GPU utilization</strong></li>
+                                <li>Fits existing prefix-cache discount pricing models</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div style="flex: 1;">
+                        <div class="section-title" style="font-size: 17px;">User Incentives</div>
+                        <div class="content-text" style="font-size: 14px;">
+                            <ul>
+                                <li><strong>Faster agent turnaround</strong> (10-20% time saved)</li>
+                                <li><strong>Reduced costs</strong> via cache-hit discounts</li>
+                                <li>Simple integration: one HTTP POST per tool result</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 10: Experimental Setup -->
+    <div class="slide">
+        <header>
+            <h2>Experimental Setup</h2>
+        </header>
+        <div class="main-content">
+            <div class="full-content">
+                <div style="display: flex; gap: 30px;">
+                    <div style="flex: 1;">
+                        <div class="section-title">Hardware & Models</div>
+                        <div class="content-text" style="font-size: 15px;">
+                            <ul>
+                                <li><strong>Hardware:</strong> Single node, <strong>4&times; NVIDIA A100 80GB</strong> (NVLink), AMD EPYC 7763 64-core CPU</li>
+                                <li><strong>Main model M:</strong> <strong>gpt-oss-120b</strong> (SOTA reasoning model) on 1 A100 via vLLM</li>
+                                <li><strong>Speculative model S:</strong> <strong>xLAM</strong> (1B / 3B / 8B) &mdash; Llama fine-tuned on tool datasets. 3 data-parallel instances across remaining 3 A100s</li>
+                                <li><strong>xLAM-8B accuracy:</strong> ~80% tool prediction on BFCL</li>
+                                <li><strong>Commercial:</strong> Subset of experiments with <strong>gpt-5 + gpt-5-nano</strong></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div style="flex: 1;">
+                        <div class="section-title">Benchmark & Workload</div>
+                        <div class="content-text" style="font-size: 15px;">
+                            <ul>
+                                <li><strong>Dataset:</strong> <strong>BFCL</strong> (Berkeley Function Calling Leaderboard) &mdash; diverse tool calling tasks with structured schemas</li>
+                                <li><strong>Concurrent agents:</strong> M &isin; {1, 8, 32} async agents</li>
+                                <li><strong>Each agent:</strong> 32 tasks, looping tool calls until final response</li>
+                                <li><strong>Tool latencies swept:</strong>
+                                    <br>&bull; Short: mean &isin; {0, 0.1, ..., 0.5}s
+                                    <br>&bull; Long: mean &isin; {0, 0.5, ..., 3.0}s</li>
+                                <li><strong>Speculation configs:</strong> &lambda; &isin; {1, 3, 5, 7, 9} samples</li>
+                                <li><strong>5 runs per config</strong> for statistical confidence</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="takeaway-box" style="margin-top: 15px;">
+                    <p style="font-size: 16px;"><strong>Three configurations compared:</strong> Standard inference (no speculation) &nbsp;vs&nbsp; Client-side speculation &nbsp;vs&nbsp; Engine-side speculation</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 11: Results - Client-side -->
+    <div class="slide">
+        <header>
+            <h2>Results: Client-side Speculation</h2>
+        </header>
+        <div class="main-content">
+            <div class="full-content">
+                <div style="display: flex; gap: 20px; flex: 1; min-height: 0;">
+                    <div style="flex: 1; display: flex; flex-direction: column;">
+                        <div class="section-title" style="font-size: 18px;">Throughput vs. Acceptance Rate</div>
+                        <div class="img-container-full" style="flex: 1; min-height: 0;">
+                            <img src="good-examples/2512.15834/figs/acceptance_rates_tool_latency_1p5s.png" alt="Acceptance Rate vs Throughput">
+                            <div class="img-caption"><strong>Throughput improvement</strong> with various speculative models. Higher acceptance rate &rarr; higher throughput. xLAM-8B reaches ~80%; smaller models improve with more samples (&lambda;).</div>
+                        </div>
+                    </div>
+                    <div style="flex: 1; display: flex; flex-direction: column;">
+                        <div class="section-title" style="font-size: 18px;">Time Saved vs. Tool Latency (32 agents)</div>
+                        <div class="img-container-full" style="flex: 1; min-height: 0;">
+                            <img src="good-examples/2512.15834/figs/time-saved_32_clients_1_num_spec.png" alt="Time Saved vs Tool Latency">
+                            <div class="img-caption"><strong>6-21% end-to-end time saved</strong> per agent. Peak savings at tool latency &asymp; generation time (~2-2.5s). Savings decrease for very long tools.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="takeaway-box" style="margin-top: 10px;">
+                    <p style="font-size: 15px;"><strong>Client-side takeaway:</strong> Without any engine modifications, agents can save 6-21% time. xLAM-1B with 9&times; samples approaches xLAM-8B with 1&times; sample.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 12: Results - Cost Analysis -->
+    <div class="slide">
+        <header>
+            <h2>Results: Cost Analysis (gpt-5 + gpt-5-nano)</h2>
+        </header>
+        <div class="main-content">
+            <div class="column">
+                <div class="section-title">Commercial Model Viability</div>
+                <div class="content-text">
+                    <ul>
+                        <li>Client-side speculation works with <strong>any commercial API</strong> &mdash; tested with <strong>gpt-5</strong> (main) + <strong>gpt-5-nano</strong> (speculative).</li>
+                        <li>With <strong>1 speculation per turn</strong>: ~10% time saved for only ~4% additional cost &mdash; the nano API call is an order of magnitude cheaper.</li>
+                        <li>With <strong>9 speculations</strong>: marginal time improvement, but cost rises to 25-30% of main generation cost.</li>
+                        <li><strong>Sweet spot:</strong> 1-3 speculations provide the best cost-benefit ratio.</li>
+                    </ul>
+                </div>
+                <div style="background: #eef2f7; padding: 12px; border-radius: 8px; border-left: 5px solid var(--accent-color); margin-top: 15px;">
+                    <p style="margin: 0; font-size: 15px; color: var(--primary-color);">
+                        <strong>Practical implication:</strong> A single cheap speculative call provides nearly all the benefit. Additional samples have diminishing returns relative to cost.
+                    </p>
+                </div>
+            </div>
+            <div class="column">
+                <div class="img-container-full" style="flex: 1; min-height: 0;">
+                    <img src="good-examples/2512.15834/figs/results-cost-spec-client.png" alt="Cost vs Time Saved">
+                    <div class="img-caption"><strong>Cost-benefit analysis:</strong> % time saved vs. added cost for gpt-5 + gpt-5-nano. ~10% time savings for only ~4% price increase at &lambda;=1.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 13: Results - Engine-side -->
+    <div class="slide">
+        <header>
+            <h2>Results: Engine-side Speculation</h2>
+        </header>
+        <div class="main-content">
+            <div class="column">
+                <div class="section-title">Additional Gains from Engine Integration</div>
+                <div class="content-text">
+                    <ul>
+                        <li>Engine-side algorithm provides <strong>2-3% additional time savings</strong> on top of client-side speculation.</li>
+                        <li><strong>Best for short tools (0-1s):</strong> tool results arrive before main model finishes reasoning &rarr; O2 (early exit) and O3 (avoid eviction) both kick in.</li>
+                        <li><strong>Long tools (&gt;1s):</strong> results arrive too late for engine-side benefits &rarr; equivalent to client-side only.</li>
+                        <li><strong>Current limitation:</strong> vLLM speculative decoding has high overhead at batch size > 1 (experimental phase). Results shown for 1 async agent.</li>
+                    </ul>
+                </div>
+                <div style="background: #eef2f7; padding: 10px; border-radius: 8px; border-left: 5px solid var(--accent-color); margin-top: 10px;">
+                    <p style="margin: 0; font-size: 14px; color: var(--primary-color);">
+                        <strong>Many common agent tools</strong> (ls, web search, file read, code lint) are in the 0-1s range &mdash; ideal for engine-side optimization.
+                    </p>
+                </div>
+            </div>
+            <div class="column">
+                <div class="img-container-full" style="flex: 1; min-height: 0;">
+                    <img src="good-examples/2512.15834/figs/time-saved_1_clients_1_num_spec_by-alg.png" alt="Client vs Engine-side Comparison">
+                    <div class="img-caption"><strong>Client-side vs. engine-side</strong> time savings for various tool latencies (1 agent, xLAM-8B). Engine-side adds 2-3% for short-latency tools.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 14: Discussion & Limitations -->
+    <div class="slide">
+        <header>
+            <h2>Discussion & Limitations</h2>
+        </header>
+        <div class="main-content" style="flex-direction: column; gap: 12px;">
+            <div style="display: flex; gap: 25px;">
+                <div style="flex: 1;">
+                    <div class="section-title" style="font-size: 18px;">Strengths</div>
+                    <div class="content-text" style="font-size: 14px;">
+                        <ul>
+                            <li><strong>Client-side works with any API</strong> &mdash; no modifications needed; immediately deployable with commercial models.</li>
+                            <li><strong>Solid theoretical grounding:</strong> analytical model for speedup bounds, conditions for gains clearly stated.</li>
+                            <li><strong>Practically effective:</strong> 6-21% time saved for ~4% extra cost is a strong cost-benefit ratio for production agents.</li>
+                            <li><strong>Composable with existing optimizations:</strong> works alongside parallel tool calls, prefix caching, speculative decoding.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div style="flex: 1;">
+                    <div class="section-title" style="font-size: 18px;">Limitations</div>
+                    <div class="content-text" style="font-size: 14px;">
+                        <ul>
+                            <li><strong>Stateless tools only:</strong> tools with side effects (state modification, writes) cannot be safely speculated without rollback mechanisms.</li>
+                            <li><strong>Theoretical 2&times; bound:</strong> client-side approach can never exceed 2&times; speedup &mdash; can only hide one of generation or tool execution.</li>
+                            <li><strong>Engine-side batch>1 overhead:</strong> vLLM's speculative decoding at batch>1 is still experimental; limits multi-agent engine-side evaluation.</li>
+                            <li><strong>Tool prediction accuracy ceiling:</strong> speculation quality depends on speculative model's tool calling ability &mdash; niche/custom tools may have low hit rates.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div style="flex: 1;">
+                <div class="section-title" style="font-size: 18px;">Discussion Points</div>
+                <div class="content-text" style="font-size: 14px;">
+                    <ul>
+                        <li><strong>Connection to speculative decoding research:</strong> adapts the verify-then-accept paradigm from token-level to tool-level. The engine-side approach uses standard speculative sampling for validation, ensuring correctness.</li>
+                        <li><strong>Composability with parallel tool calling:</strong> when models emit multiple independent tool calls, each can be independently speculated &mdash; the approaches are orthogonal and stack.</li>
+                        <li><strong>Real-world generalization:</strong> BFCL provides diverse tools, but real-world agents may have highly custom tools with lower prediction accuracy. Domain-specific fine-tuning of speculative models could help.</li>
+                        <li><strong>Stateful tool speculation:</strong> future work could explore rollback/undo mechanisms for stateful tools, or transaction-like semantics for speculative execution.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 15: Summary / Thank You -->
+    <div class="slide">
+        <header>
+            <h2>Summary & Key Takeaways</h2>
+        </header>
+        <div class="main-content" style="flex-direction: column; justify-content: center; gap: 20px;">
+            <div style="background: #eef2f7; padding: 25px 30px; border-radius: 10px; border-left: 6px solid var(--primary-color);">
+                <div style="font-size: 20px; color: var(--primary-color); font-weight: bold; margin-bottom: 15px;">Key Takeaways</div>
+                <div class="content-text" style="font-size: 16px;">
+                    <ul>
+                        <li><strong>Problem:</strong> Tool calls fragment LM agent inference, introducing sequential latency and eviction overhead that accumulate over multi-step tasks.</li>
+                        <li><strong>Solution:</strong> Speculative tool execution &mdash; use a small, fast model to predict tool calls and pre-execute them in parallel with main generation.</li>
+                        <li><strong>Two complementary approaches:</strong> Client-side (works with any API, 6-21% time saved) + Engine-side (additional 2-3% for short tools).</li>
+                        <li><strong>Theoretical guarantee:</strong> S<sub>spec</sub> < 2, with best gains when tool latency T &asymp; generation time G.</li>
+                        <li><strong>Practical impact:</strong> Up to <strong>196 tok/s improvement</strong>; only ~4% extra cost with commercial APIs.</li>
+                        <li><strong>Proposed tool cache API</strong> enables easy adoption by inference providers.</li>
+                    </ul>
+                </div>
+            </div>
+            <div style="text-align: center; margin-top: 30px;">
+                <h1 style="font-size: 30px; color: var(--primary-color);">Thank You! Questions & Discussion</h1>
+                <div class="meta-info" style="margin-top: 15px; font-size: 16px;">
+                    <p>Paper: "Optimizing Agentic Language Model Inference via Speculative Tool Calls"</p>
+                    <p>Nichols, Singhania, Jekel, Bhatele, Menon | LLNL & UMD</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

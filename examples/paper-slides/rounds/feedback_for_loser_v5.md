@@ -1,0 +1,14 @@
+# Feedback for Version A
+
+- Split `Background: The Standard Tool-Calling Pipeline` into a pure workflow slide and a separate prior-work/gap slide. Right now the pipeline, existing solutions, and the paper's key insight all compete on one screen, which breaks the "one core idea per slide" guideline.
+- Compress `Speculative Decoding vs. Speculative Tool Calling` into a simpler contrast with one visual and one takeaway sentence. The current two-column text treatment repeats points already covered in motivation/background and adds reading load before the main method begins.
+- Trim `Experimental Setup` to the three things the audience needs live: models, workload, and evaluation metrics. Move the exact hyperparameter sweep, variance-control details, and secondary setup facts into speaker notes or backup.
+- Rework `Results: Client-side Speculation` and `Results: Engine-side — Incremental Gains` so the figures occupy more of the slide and the explanatory text drops to at most 1-2 bullets. The rubric explicitly favors figure-dominant result slides.
+- Tighten `Strengths & Limitations` to about three high-value points per column. Five bullets on each side is too dense for a group-meeting slide and forces the audience to read instead of listen.
+- Shorten `Summary & Key Takeaways` to one headline plus 3-4 takeaway bullets. Six numbered blocks makes the closing slide feel like a handout rather than a final verbal recap.
+- Increase the font size on secondary content such as card descriptions, captions, API text, and dense bullet blocks so every element is readable from the back of the room. If a detail needs smaller text, it belongs in notes instead.
+- Simplify the visual system to 2-3 accent colors and fewer box styles across section markers, cards, callouts, and formula blocks. The current deck is coherent, but it still carries more visual variation than the clean-minimal guideline asks for.
+- Make every figure caption explicitly takeaway-first and quantitative, especially on method and analysis slides. The caption should tell the audience what to remember without requiring them to decode the figure structure first.
+- Push the theory slides even harder toward intuition-first delivery: open with the plain-language claim, then show the formula, then keep proof-level detail fully in the appendix. This will better match the rubric's "intuition first, formula as support" requirement.
+- Reduce the discussion slide to 2-3 shorter prompts with more whitespace and stronger wording. Four multi-line questions create another text-heavy moment late in the talk, exactly where discussion slides should instead be quick to scan and easy to launch from.
+- Keep the appendix focused on Q&A support rather than full derivation reading. The current backup material is useful, but it would work better as more aggressively pruned proof/runtime reminders with the longer explanation shifted into notes.
