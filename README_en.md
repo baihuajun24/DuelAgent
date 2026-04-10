@@ -1,4 +1,4 @@
-# DuelGAN: A Winner-Stays Adversarial Framework for AI Content Generation
+# DuelAgent: A Winner-Stays Adversarial Framework for AI Content Generation
 
 [中文版](README.md)
 

@@ -1,8 +1,8 @@
-# DuelGAN：内容生成擂台 — 赢者不动，输者迭代
+# DuelAgent：内容生成擂台 — 赢者不动，输者迭代
 
 [English version](README_en.md)
 
-> **DuelGAN: A Winner-Stays Adversarial Framework for AI Content Generation**
+> **DuelAgent: A Winner-Stays Adversarial Framework for AI Content Generation**
 >
 > 灵感来自 GAN（生成对抗网络）：两个生成器竞争，一个判别器打分，输者改进，赢者不动，循环迭代直到收敛。特别适合**难以自动验证、需要主观评分**的生成任务——PPT、技术文档、设计稿、营销文案等。本仓库以论文组会 PPT 为例展示完整流程。
 
@@ -66,7 +66,7 @@
 ```
 
 ```python
-# DuelGAN 伪代码
+# DuelAgent 伪代码
 
 scoring_guide = controller.ask_user_preferences()  # Round -1
 A = gen_a.create(source_material, scoring_guide)    # Round 0
@@ -133,3 +133,18 @@ for round in range(1, max_rounds + 1):
 ---
 
 *多个 agent 会话，3 个 AI agent，一个评分标准。代价是 token，换来的是两份独立进化、质量收敛的作品。特别适合 PPT、技术文档、设计稿、营销文案——那些没有标准答案、需要主观判断的生成任务。*
+
+## 灵感来源
+
+本项目的设计借鉴了以下 LLM / ML 领域的概念和工作：
+
+- **GAN（Generative Adversarial Networks）** — 生成器 vs 判别器的对抗训练范式 (Goodfellow et al., 2014)
+- **Self-Refine** — 单 agent 自我迭代改进 (Madaan et al., 2023)
+- **Constitutional AI** — 基于规则的自我纠正 (Bai et al., 2022)
+- **LLM-as-a-Judge** — 用 LLM 做自动评审 (Zheng et al., 2023)
+- **Chatbot Arena / LMSYS** — 基于 Elo 的 LLM 对战排名 (Zheng et al., 2023)
+- **Multi-Agent Debate** — 多 agent 辩论提升推理质量 (Du et al., 2023)
+- **Mixture of Agents (MoA)** — 跨模型迭代精炼 (Wang et al., 2024)
+- **GADC** — GAN 启发的多 agent 自主软件工程框架 (2025)
+- **Tournament Selection** — 进化计算中的锦标赛选择策略
+- **Self-Play** — 自博弈提升策略质量 (Silver et al., 2017; SPIN, Chen et al., 2024)

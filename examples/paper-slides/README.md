@@ -1,6 +1,6 @@
 # Example: Paper Slides for a Group Meeting
 
-Using DuelGAN to generate presentation slides for arXiv 2512.15834 ("Optimizing Agentic Language Model Inference via Speculative Tool Calls").
+Using DuelAgent to generate presentation slides for arXiv 2512.15834 ("Optimizing Agentic Language Model Inference via Speculative Tool Calls").
 
 ## Setup
 
