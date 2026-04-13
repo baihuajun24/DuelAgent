@@ -1,0 +1,17 @@
+Language models (LMs) are becoming increasingly dependent on external tools.
+LM-based agentic frameworks frequently interact with their environment via such
+tools to search files, run code, call APIs, etc. Further, modern
+reasoning-based LMs use tools such as web search and Python code execution to
+enhance their reasoning capabilities. While tools greatly improve the
+capabilities of LMs, they also introduce performance bottlenecks during the
+inference process. 
+In this paper, we introduce novel systems optimizations to address such
+performance bottlenecks by speculating tool calls and forcing sequences to
+remain resident in the inference engine to minimize overheads.  Our
+optimizations lead to throughput improvements of several hundred tokens per
+second when hosting inference for LM agents. 
+We provide a theoretical analysis of our algorithms to provide insights
+into speculation configurations that will yield the best performance.
+Further, we recommend a new ``tool cache'' API endpoint to enable LM providers to easily adopt these
+optimizations.
+

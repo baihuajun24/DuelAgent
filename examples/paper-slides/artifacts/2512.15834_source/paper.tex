@@ -1,0 +1,186 @@
+
+\documentclass[letterpaper,twocolumn,10pt,dvipsnames]{article}
+\usepackage{usenix}
+
+
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{cleveref}
+\usepackage{annotate-equations}
+\usepackage{circledsteps}
+\usepackage{xcolor}
+\usepackage[most]{tcolorbox}
+\usepackage{tabularx}
+\usepackage{booktabs}
+\usepackage{array}
+
+
+\usepackage{amsthm}
+\newtheorem{lemma}{Lemma}
+\DeclareMathOperator*{\argmin}{argmin}
+\DeclareMathOperator*{\argmax}{argmax}
+
+\newcommand{\todo}[1]{\textcolor{red}{#1}}
+
+\definecolor{ObservationBlue}{HTML}{006699}
+\newtcolorbox{observationboxnonumber}[1][]{%
+  enhanced,
+  breakable,
+  colback=gray!3,
+  colframe=black!20,
+  coltitle=black,
+  fonttitle=\bfseries,
+  title={Observation},
+  boxrule=0.5pt,
+  leftrule=0pt,
+  rightrule=0pt,
+  toprule=0pt,
+  bottomrule=0pt,
+  borderline west={2pt}{0pt}{ObservationBlue},
+  boxsep=4pt,
+  left=7pt,
+  right=7pt,
+  top=5pt,
+  bottom=5pt,
+  #1
+}
+
+\newtcolorbox[auto counter]{observationbox}[2][]{%
+  enhanced,
+  breakable,
+  colback=gray!3,
+  colframe=black!20,
+  coltitle=black,
+  colbacktitle=gray!10,
+  coltitle=MidnightBlue!50,
+  fonttitle=\bfseries,
+  title={Observation~\thetcbcounter: #2},
+  boxrule=0.5pt,
+  leftrule=0pt,
+  rightrule=0pt,
+  toprule=0pt,
+  bottomrule=0pt,
+  borderline west={2pt}{0pt}{ObservationBlue},
+  boxsep=4pt,
+  left=7pt,
+  right=7pt,
+  top=5pt,
+  bottom=5pt,
+  #1
+}
+
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+
+\newtcolorbox{apispecbox}[2][]{%
+  enhanced,
+  breakable,
+  colback=gray!3,
+  colframe=black!20,
+  coltitle=black,
+  fonttitle=\bfseries,
+  title={API: #2},
+  boxrule=0.5pt,
+  leftrule=0pt,
+  rightrule=0pt,
+  toprule=0pt,
+  bottomrule=0pt,
+  borderline west={2pt}{0pt}{ObservationBlue},
+  boxsep=4pt,
+  left=7pt,
+  right=7pt,
+  top=6pt,
+  bottom=6pt,
+  #1
+}
+
+\definecolor{SpecPink}{HTML}{FF99FF}
+\definecolor{DecodeOrange}{HTML}{FF6633}
+\definecolor{DecodeOrange}{HTML}{DD6633}
+\definecolor{PrefillBlue}{HTML}{006699}
+
+
+
+
+\begin{document}
+
+\date{}
+
+\title{\Large \bf Optimizing Agentic Language Model Inference via Speculative Tool Calls} %
+
+\author{
+{\rm Anonymous Authors}\\
+} %
+
+\author{
+    {\rm Daniel Nichols}\\
+    Lawrence Livermore National Laboratory
+    \and
+    {\rm Prajwal Singhania}\\
+    University of Maryland
+    \and
+    {\rm Charles Jekel}\\
+    Lawrence Livermore National Laboratory
+    \and
+    {\rm Abhinav Bhatele}\\
+    University of Maryland
+    \and
+    {\rm Harshitha Menon}\\
+    Lawrence Livermore National Laboratory
+}
+
+\maketitle
+
+\begin{abstract}
+\input{abstract}
+\end{abstract}
+
+
+\section{Introduction}\label{sec:intro}
+\input{sections/intro}
+
+\section{Background}\label{sec:bg}
+\input{sections/bg}
+
+
+\section{Speculative Tool Calling Algorithms}\label{sec:methodology}
+\input{sections/methodology}
+
+
+\section{Experimental Setup}\label{sec:setup}
+\input{sections/setup}
+
+\section{Evaluation Metrics}\label{sec:metrics}
+\input{sections/metrics}
+
+\section{Results}\label{sec:results}
+\input{sections/results}
+
+
+\section{Related Work}\label{sec:related-work}
+\input{sections/related-work}
+
+\section{Conclusion}
+\input{sections/conclusion}
+
+
+
+
+
+
+\section*{Acknowledgments}
+This work was performed under the auspices of the U.S. Department of Energy (DOE) by Lawrence Livermore National Laboratory
+under Contract DE-AC52-07NA27344 (LLNL-CONF-2014336-DRAFT). This
+material is based upon work supported by the DOE Office of Science,
+Advanced Scientific Computing Research program through solicitation DE-FOA-0003264, "Advancements in Artificial Intelligence
+for Science."
+This research used resources of the National Energy Research Scientific Computing Center (NERSC), a U.S. Department of Energy Office of Science User Facility, operated
+under Contract No. DE-AC02-05CH11231 using NERSC
+award ALCC-ERCAP0034775.
+
+
+
+\bibliographystyle{plain}
+\bibliography{citations/references,citations/extra}
+
+\end{document}

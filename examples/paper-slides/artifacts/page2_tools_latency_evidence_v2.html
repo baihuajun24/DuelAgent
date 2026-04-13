@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tool Latency Evidence v2</title>
+<style>
+:root{
+  --pri:#243447;
+  --acc:#b13a2d;
+  --bg:#f6f8fb;
+  --ink:#222;
+  --muted:#667085;
+  --line:#d9e0ea;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:#2a2a2a;
+  font-family:"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:100vh;
+}
+.slide{
+  width:1280px;
+  height:720px;
+  background:#fff;
+  padding:28px 34px 26px;
+  position:relative;
+  overflow:hidden;
+  box-shadow:0 6px 30px rgba(0,0,0,.25);
+}
+.pb{
+  position:absolute;
+  left:0;
+  bottom:0;
+  width:15%;
+  height:5px;
+  background:var(--acc);
+}
+header{
+  border-bottom:3px solid var(--pri);
+  padding-bottom:10px;
+  margin-bottom:14px;
+}
+h1{
+  margin:0;
+  font-size:29px;
+  color:var(--pri);
+  line-height:1.18;
+}
+.sub{
+  margin-top:6px;
+  color:var(--muted);
+  font-size:16px;
+}
+.intro{
+  display:grid;
+  grid-template-columns:1.15fr .85fr;
+  gap:16px;
+  margin-bottom:12px;
+}
+.panel{
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:linear-gradient(135deg,#f8fafc,#eef3f8);
+  padding:14px 16px;
+}
+.panel h2{
+  margin:0 0 10px;
+  font-size:20px;
+  color:var(--pri);
+}
+.panel ul{
+  margin:0;
+  padding-left:22px;
+  font-size:18px;
+  line-height:1.4;
+  color:var(--ink);
+}
+.panel li{margin-bottom:8px}
+.cn{
+  display:block;
+  margin-top:2px;
+  color:#5f6b7a;
+  font-size:15px;
+  line-height:1.3;
+}
+.mini{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+}
+.mini .box{
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:#fff;
+  padding:12px;
+}
+.mini .num{
+  font-size:28px;
+  font-weight:800;
+  line-height:1;
+  color:var(--acc);
+}
+.mini .txt{
+  margin-top:8px;
+  font-size:14px;
+  line-height:1.3;
+  color:var(--pri);
+  font-weight:700;
+}
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:14px;
+  height:510px;
+}
+.card{
+  border:1px solid var(--line);
+  border-radius:14px;
+  overflow:hidden;
+  background:#fff;
+  display:flex;
+  flex-direction:column;
+}
+.card img{
+  width:100%;
+  height:310px;
+  object-fit:contain;
+  background:#fff;
+  padding:10px 10px 0;
+}
+.cap{
+  border-top:1px solid var(--line);
+  padding:12px 13px 13px;
+}
+.cap .title{
+  font-size:17px;
+  font-weight:800;
+  color:var(--pri);
+  line-height:1.28;
+}
+.cap .desc{
+  margin-top:6px;
+  font-size:14px;
+  line-height:1.35;
+  color:#4b5563;
+}
+.source{
+  margin-top:8px;
+  font-size:12.5px;
+  color:#7b8794;
+}
+</style>
+</head>
+<body>
+  <div class="slide">
+    <div class="pb"></div>
+    <header>
+      <h1>Evidence From Prior Work / 先验证据：工具调用才是更值得优化的瓶颈</h1>
+      <div class="sub">Three small panels: one mechanism view and two measured breakdowns.</div>
+    </header>
+
+    <section class="intro">
+      <div class="panel">
+        <h2>Message for the Audience / 想让听众立刻记住的话</h2>
+        <ul>
+          <li><strong>Agents are not just “LLMs that generate slowly”.</strong><span class="cn">真正拖慢 end-to-end latency 的，往往是反复的 tool loop。</span></li>
+          <li><strong>Across papers, tools repeatedly appear as a first-order latency term.</strong><span class="cn">不只是本文自己这么说，其他工作也反复测到工具执行是主要组成部分。</span></li>
+          <li><strong>So the right optimization target is overlap, not only faster decoding.</strong><span class="cn">因此要优化的是 “LLM thinking + tool execution” 的重叠，而不只是 token decode。</span></li>
+        </ul>
+      </div>
+      <div class="mini">
+        <div class="box">
+          <div class="num">36%-60%</div>
+          <div class="txt">Tool share in PASTE traces<span class="cn">PASTE 观测到工具占总时延 36%-60%</span></div>
+        </div>
+        <div class="box">
+          <div class="num">&lt;20%</div>
+          <div class="txt">Init is usually minor<span class="cn">工具初始化通常不是最大瓶颈</span></div>
+        </div>
+        <div class="box">
+          <div class="num">Serial</div>
+          <div class="txt">LLM → tool → resume<span class="cn">tool loop 天然把端到端时延拉长</span></div>
+        </div>
+        <div class="box">
+          <div class="num">Cross-paper</div>
+          <div class="txt">PASTE + SPAgent<span class="cn">来自两篇独立工作，不是单篇自证</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <img src="evidence_figs/spagent_breakdown_fig7_tight.png" alt="SPAgent latency breakdown">
+        <div class="cap">
+          <div class="title">Single-request latency breakdown / 单请求时延拆解</div>
+          <div class="desc">Another paper also separates <code>LLM time</code> and <code>Act exec time</code>, showing action execution remains a major component.<br>另一篇工作也把 LLM 与动作执行拆开，说明工具执行不是边角成本。</div>
+          <div class="source">Source: SPAgent, Huang et al., 2025, Figure 7</div>
+        </div>
+      </article>
+
+      <article class="card">
+        <img src="evidence_figs/paste_agent_breakdown.png" alt="PASTE agent breakdown">
+        <div class="cap">
+          <div class="title">Agent time: LLM vs. tools / Agent 总时延：LLM vs 工具</div>
+          <div class="desc">Measured across Gemini-Coding, Gemini-DR, Qwen-DR, and VirtualLab, tools take a substantial share of total time.<br>在多个 agent 产品和任务上，工具都占显著比例。</div>
+          <div class="source">Source: PASTE, Sui et al., 2026, Figure 3(a)</div>
+        </div>
+      </article>
+
+      <article class="card">
+        <img src="evidence_figs/paste_tool_breakdown.png" alt="PASTE tool breakdown">
+        <div class="cap">
+          <div class="title">Tool time: init vs. execution / 工具内部：初始化 vs 执行</div>
+          <div class="desc">Most tool latency is not just environment setup; execution dominates, so cold-start-only fixes are insufficient.<br>大部分工具时延不是简单的启动开销，因此只优化 cold start 不够。</div>
+          <div class="source">Source: PASTE, Sui et al., 2026, Figure 3(b)</div>
+        </div>
+      </article>
+    </section>
+  </div>
+</body>
+</html>

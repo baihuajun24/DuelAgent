@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tool Latency Evidence v1</title>
+<style>
+:root{
+  --pri:#243447;
+  --acc:#b13a2d;
+  --bg:#f6f8fb;
+  --ink:#222;
+  --muted:#667085;
+  --line:#d9e0ea;
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:#2a2a2a;
+  font-family:"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:100vh;
+}
+.slide{
+  width:1280px;
+  height:720px;
+  background:#fff;
+  padding:30px 36px 28px;
+  position:relative;
+  overflow:hidden;
+  box-shadow:0 6px 30px rgba(0,0,0,.25);
+}
+.pb{
+  position:absolute;
+  left:0;
+  bottom:0;
+  width:13%;
+  height:5px;
+  background:var(--acc);
+}
+header{
+  border-bottom:3px solid var(--pri);
+  padding-bottom:10px;
+  margin-bottom:16px;
+}
+h1{
+  margin:0;
+  font-size:30px;
+  color:var(--pri);
+  line-height:1.2;
+}
+.sub{
+  margin-top:6px;
+  color:var(--muted);
+  font-size:16px;
+}
+.top{
+  display:grid;
+  grid-template-columns:1.25fr .95fr;
+  gap:18px;
+  margin-bottom:12px;
+}
+.summary{
+  background:linear-gradient(135deg,#f8fafc,#eef3f8);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:16px 18px 14px;
+}
+.summary h2{
+  margin:0 0 10px;
+  font-size:21px;
+  color:var(--pri);
+}
+.summary ul{
+  margin:0;
+  padding-left:24px;
+  font-size:19px;
+  line-height:1.42;
+  color:var(--ink);
+}
+.summary li{margin:0 0 8px}
+.meta{
+  margin-top:10px;
+  padding-top:10px;
+  border-top:1px solid var(--line);
+  font-size:14px;
+  line-height:1.35;
+  color:#596579;
+}
+.cn{
+  display:block;
+  margin-top:2px;
+  color:#5f6b7a;
+  font-size:15px;
+  line-height:1.3;
+}
+.statbox{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+}
+.stat{
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:var(--bg);
+  padding:14px 12px;
+}
+.stat .num{
+  font-size:30px;
+  line-height:1;
+  font-weight:800;
+  color:var(--acc);
+  margin-bottom:8px;
+}
+.stat .label{
+  font-size:15px;
+  line-height:1.3;
+  color:var(--pri);
+  font-weight:700;
+}
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:16px;
+  height:486px;
+}
+.card{
+  border:1px solid var(--line);
+  border-radius:14px;
+  overflow:hidden;
+  background:#fff;
+  display:flex;
+  flex-direction:column;
+}
+.card img{
+  width:100%;
+  height:316px;
+  object-fit:contain;
+  background:#fff;
+  padding:8px 8px 0;
+}
+.cap{
+  border-top:1px solid var(--line);
+  padding:10px 12px 12px;
+}
+.cap .title{
+  font-size:17px;
+  color:var(--pri);
+  font-weight:800;
+  line-height:1.3;
+}
+.cap .desc{
+  margin-top:5px;
+  font-size:14px;
+  line-height:1.35;
+  color:#4b5563;
+}
+.source{
+  margin-top:7px;
+  font-size:12.5px;
+  color:#7b8794;
+}
+</style>
+</head>
+<body>
+  <div class="slide">
+    <div class="pb"></div>
+    <header>
+      <h1>Evidence: Tools Dominate Agent Latency / 证据：工具调用是 Agent 时延大头</h1>
+      <div class="sub">A cleaner motivation slide focused on measured latency breakdowns from prior work.</div>
+    </header>
+
+    <section class="top">
+      <div class="summary">
+        <h2>Takeaway / 核心结论</h2>
+        <ul>
+          <li><strong>Tool execution is often a major part of total latency.</strong><span class="cn">在真实 agent workload 里，工具执行经常占总时延的很大一部分，而不是只有 LLM 在慢。</span></li>
+          <li><strong>Cold-start or init is not the main issue.</strong><span class="cn">真正的大头通常是工具执行本身，而不是初始化；只做 init 优化不够。</span></li>
+          <li><strong>This supports speculative tool execution.</strong><span class="cn">如果能把工具执行和模型思考重叠起来，就能抓住最关键的优化空间。</span></li>
+        </ul>
+        <div class="meta"><strong>Paper:</strong> <em>Act While Thinking: Accelerating LLM Agents via Pattern-Aware Speculative Tool Execution (PASTE)</em>.<br><strong>Workloads:</strong> Gemini-Coding = coding assistant, Gemini-DR / Qwen-DR = deep research, VirtualLab = scientific research.</div>
+      </div>
+      <div class="statbox">
+        <div class="stat">
+          <div class="num">36%-60%</div>
+          <div class="label">Tool share of end-to-end latency<span class="cn">工具执行占总时延比例</span></div>
+        </div>
+        <div class="stat">
+          <div class="num">&lt;20%</div>
+          <div class="label">Tool init in prior traces<span class="cn">初始化通常不到工具总时延的五分之一</span></div>
+        </div>
+        <div class="stat">
+          <div class="num">4 agents</div>
+          <div class="label">Consistent across products<span class="cn">Gemini / Qwen / VirtualLab 均观察到类似现象</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <img src="evidence_figs/paste_agent_breakdown.png" alt="PASTE agent time breakdown">
+        <div class="cap">
+          <div class="title">Agent time breakdown: LLM vs. tools / Agent 时延拆解：LLM 与工具</div>
+          <div class="desc">Tasks: coding assistant, deep research, scientific research. Tools take a large share across all four agents.<br>任务覆盖 coding assistant、deep research、scientific research；四个 agent 上工具部分都很显著。</div>
+          <div class="source">Source: <em>Act While Thinking: Accelerating LLM Agents via Pattern-Aware Speculative Tool Execution</em>, Figure 3(a)</div>
+        </div>
+      </article>
+
+      <article class="card">
+        <img src="evidence_figs/paste_tool_breakdown.png" alt="PASTE tool time breakdown">
+        <div class="cap">
+          <div class="title">Tool time breakdown: init vs. execution / 工具内部时延：初始化 vs 执行</div>
+          <div class="desc">The dominant part is execution, not just setup. That is why overlap matters more than cold-start-only optimization.<br>真正的大头是执行本身，不只是启动；这也解释了为什么要做 overlap，而不只是 cold start 优化。</div>
+          <div class="source">Source: <em>Act While Thinking: Accelerating LLM Agents via Pattern-Aware Speculative Tool Execution</em>, Figure 3(b)</div>
+        </div>
+      </article>
+    </section>
+  </div>
+</body>
+</html>

@@ -1,0 +1,22 @@
+With our tool-calling agent experiments set up, it is important that we are able to measure the benefits of speculation in order to compare approaches.
+Metrics like walltime are tricky since some agents might decide to generate lots of response text to a prompt, while another gives a short response. This can happen due to diversity in sampled outputs, even for the same prompt.
+For example, consider agents A and B each call tools, receive outputs from those tools, and then generate a response. 
+Agent A has its tool speculated correctly, and agent B does not.
+If agent A generates a 2000 token response to the tool output, while agent B generations a 50 token response, then agent A will have a larger wall time despite getting better benefits from speculation.
+For this reason we use \emph{throughput} and \emph{percent time saved} as metrics for comparison.
+
+\vspace{0.7em}
+\noindent\textbf{Throughput} is computed as the number of tokens generated per second. We compute this for each agent and report the average throughput.
+
+\vspace{0.7em}
+\noindent\textbf{Time Saved} is a measure of percent reduced time relative to a non-speculative baseline. We record time from agent start to finish with and without speculation for the same prompt(s). Let $T_{\text{base}}$ denote this time for the baseline agent (no speculation) and $T_{\text{spec}}$ the time for the same agent configuration using our speculative algorithm. We define
+\[
+\text{Time Saved} = 100 \times \frac{T_{\text{base}} - T_{\text{spec}}}{T_{\text{base}}} \,\%.
+\]
+We compute this quantity per agent and report the mean across all the async agents. Because both runs share the same prompts, tools, and tool outputs, this metric isolates the reduction in inference time attributable to speculation.
+
+In addition to throughput and time saved, we also analyze cost for the client side algorithm.
+Since it can be implemented entirely using an API it can be used with commercial models.
+We measure the \textbf{cost} using the token usage data returned by the OpenAI API and the publicly listed per-token prices from OpenAI (costs based on November 2025 pricing).
+Cost is reported as the \emph{additional cost} of speculation versus just using the main model.
+Since agents can vary in number of turns or tokens, we report the cost per 100 agent turns.

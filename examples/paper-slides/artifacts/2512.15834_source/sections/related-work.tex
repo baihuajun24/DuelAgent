@@ -1,0 +1,10 @@
+Several works have looked at accelerating LM inference using speculation.
+Leviathan et al.~\cite{leviathan_fast_2023} introduce speculative decoding to use a smaller LM to predict tokens for a larger LM.
+While very related to our approach, the traditional speculative decoding does not work well for speculating tool calls.
+As we have demonstrated in our analysis the main speedup from speculating tools comes from overlapping tool execution with generation.
+In traditional speculative decoding the draft model is usually only ever 10 tokens ahead of the main model meaning we could only overlap tool calls with 10 decoding steps.
+In the context of tool calling it is better to speculate tools as early and as many times as possible.
+Other works~\cite{chen2023accelerating} have looked into other variations of generation speculation, such as in sampling, but suffer from the same drawback as speculative decoding: tool calls need to be speculated as soon as possible in the generation.
+
+Other approaches to improving agent tool use performance try to increase the accuracy of smaller models at predicting the right tool to use. By using smaller LMs for taking actions we can reduce inference time. Schick et al.~\cite{schick2023toolformer} and Patil et al.~\cite{patil_gorilla_2023} accomplish this through fine-tuning on large datasets of tool calling interactions.
+Works like SWE-Agent~\cite{yang2024swe} accomplish better and faster agent generation by providing the {\it best granularity} of tools to the agent. By giving it the right tools they reduce the number of tool calls it needs to make and ultimately the overall time for the agent to execute.

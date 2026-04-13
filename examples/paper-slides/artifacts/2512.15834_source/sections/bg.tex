@@ -1,0 +1,51 @@
+
+
+
+In this section we provide background on tool calling and speculative decoding.
+
+\subsection{Tool Calling}\label{sec:bg-tool-calling}
+
+Most modern LMs use \emph{tool calling} (or \emph{function calling}) as an interface for interacting with external systems (command line, APIs, etc).
+In a typical setup, the user provides (1) a natural language prompt describing the task and (2) a list of available tools with structured argument schemas.
+Given this input, the model responds with either natural language or a structured \emph{tool call} specifying which tool to invoke and with what arguments.
+The client then executes the tool and sends the tool output back to the model that includes the original conversation plus the tool output.
+In LM agents this process is typically repeated until the model has enough context to produce a final output or it has completed its tasks.
+
+From the perspective of the inference engine, each tool call breaks the generation into multiple, shorter requests separated by externally executing the tool. For any request, the engine first processes all tokens in the prompt during the \emph{prefill} phase to generate the first output token, and then produces subsequent tokens auto-regressively during the \emph{decode} phase. When a tool call is generated, further decoding of the sequence is halted, and it is removed from the active batch while the client executes the tool. Once the tool result is available, the client submits a new request consisting of the original prompt, the intermediate text, and the tool output, forcing the engine to prefill the history again before it can decode the next tool call or final output.
+For agentic workloads with many tools and long multi-step plans, this leads to fragmented generations and overheads from repeatedly restarting generation with prompts increasing in length.
+In long agent executions prefilling long prompts and waiting on tools can easily become big bottlenecks.
+
+Two common optimizations are used today to mitigate these costs:
+
+\vspace{0.08in}
+\noindent \textbf{Parallel tool calls.}
+    Instead of emitting a single tool invocation per turn, models can return multiple independent tool calls in one response~\cite{singh2024llm, chen2024facilitating}.
+    This enables the client to execute tools concurrently and then return results back to the model in a single response.
+    This reduces the number of model/tool round-trips, but still introduces gaps during inference where the engine has to hand off to the client.
+    Furthermore, sometimes tools need to be called sequentially as they have a dependence on each other or the model needs the output of one tool before it can decide to call the next.
+    Models also need to be trained to support parallel tool calling.
+
+\vspace{0.08in}
+\noindent \textbf{Prefix caching.}
+    Many inference runtimes maintain a \emph{prefix cache} of KV state for recently used prompts~\cite{zheng2024sglang, kwon2023efficient}.
+    This enables the runtime to reuse the KV cache if a user submits another request with the same history as a request they submitted shortly before; prefix caching drastically reduces prefill overhead during quick multi-turn API use.
+    However, it does not eliminate the overhead of removing sequences from the batch, re-scheduling them, or managing cache eviction under multi-tenant loads, which can actually have high overheads if privacy-preserving algorithms are required~\cite{vllm_apc, song2025early}.
+
+
+
+\subsection{Speculative Decoding}\label{sec:bg-spec-decoding}
+Speculative decoding is an inference optimization that accelerates LM generation by utilizing a smaller, faster \emph{draft} LM to speculate tokens for a larger, slower LM.
+Given the same prompt, the draft model proposes several \emph{speculative} tokens ahead of the target model.
+The target model then verifies these proposed tokens in parallel: as long as the draft tokens are likely under the target’s distribution, they are accepted; when a mismatch occurs, the algorithm falls back to sampling from the target model at the first rejection point.
+This was first proposed by Leviathan et al.~\cite{leviathan_fast_2023} and has been modified and improved in many ways since its first introduction~\cite{hu_speculative_2025}.
+
+This setup works well for two reasons: draft models can often predict some easier text with high accuracy and the target model can validate tokens in a single forward pass.
+The latter means there is no slowdown to inference, a forward pass of the target model is run regardless to sample the next token, but if it validates the speculative model, then we get several tokens for free.
+The only extra cost is the compute needed to run the speculative model.
+
+This work adapts the ideas behind speculative decoding, but with some subtle differences.
+Generally, draft models in speculative decoding are only 3-10 tokens ahead of the target model.
+This works great for speculative generation, but in speculative tool calling, if we were to launch tools as the draft model generates them, then we would only be overlapping tool calls with a few generated tokens.
+This would only save a few milliseconds at most and be largely dominated by the longer tool calling times and API overheads.
+Instead, with tools it is better to speculate as soon as possible and, in the case of stateless cheap tools, as many times as possible.
+Our methodology is designed around this insight and key difference with speculative decoding. 

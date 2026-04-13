@@ -1,0 +1,254 @@
+
+@misc{wu_dualpath_2026,
+	title = {{DualPath}: Breaking the Storage Bandwidth Bottleneck in Agentic {LLM} Inference},
+	url = {http://arxiv.org/abs/2602.21548},
+	doi = {10.48550/arXiv.2602.21548},
+	shorttitle = {{DualPath}},
+	abstract = {The performance of multi-turn, agentic {LLM} inference is increasingly dominated by {KV}-Cache storage I/O rather than computation. In prevalent disaggregated architectures, loading the massive {KV}-Cache from external storage creates a fundamental imbalance: storage {NICs} on prefill engines become bandwidth-saturated, while those on decoding engines remain idle. This asymmetry severely constrains overall system throughput. We present {DualPath}, an inference system that breaks this bottleneck by introducing dual-path {KV}-Cache loading. Beyond the traditional storage-to-prefill path, {DualPath} enables a novel storage-to-decode path, in which the {KV}-Cache is loaded into decoding engines and then efficiently transferred to prefill engines via {RDMA} over the compute network. {DualPath} combines this optimized data path -- which inherently avoids network congestion and avoids interference with latency-critical model execution communications -- with a global scheduler that dynamically balances load across prefill and decode engines. Our evaluation on three models with production agentic workloads demonstrates that {DualPath} improves offline inference throughput by up to 1.87\${\textbackslash}times\$ on our in-house inference system. It can also improve online serving throughput by an average factor of 1.96\${\textbackslash}times\$ without violating {SLO}.},
+	number = {{arXiv}:2602.21548},
+	publisher = {{arXiv}},
+	author = {Wu, Yongtong and Chen, Shaoyuan and Zhong, Yinmin and Huang, Rilin and Tan, Yixuan and Zhang, Wentao and Zhang, Liyue and Zhou, Shangyan and Liu, Yuxuan and Zhou, Shunfeng and Zhang, Mingxing and Jin, Xin and Huang, Panpan},
+	urldate = {2026-03-31},
+	date = {2026-02-26},
+	eprinttype = {arxiv},
+	eprint = {2602.21548 [cs]},
+	keywords = {Computer Science - Distributed, Parallel, and Cluster Computing},
+	file = {Full Text PDF:/Users/huajunbai/Zotero/storage/WUYJX8KX/Wu 等 - 2026 - DualPath Breaking the Storage Bandwidth Bottleneck in Agentic LLM Inference.pdf:application/pdf;Snapshot:/Users/huajunbai/Zotero/storage/QVA7ZGIU/2602.html:text/html},
+}
+
+@misc{sui_act_2026,
+	title = {Act While Thinking: Accelerating {LLM} Agents via Pattern-Aware Speculative Tool Execution},
+	url = {http://arxiv.org/abs/2603.18897},
+	doi = {10.48550/arXiv.2603.18897},
+	shorttitle = {Act While Thinking},
+	abstract = {{LLM}-powered agents are emerging as a dominant paradigm for autonomous task solving. Unlike standard inference workloads, agents operate in a strictly serial "{LLM}-tool" loop, where the {LLM} must wait for external tool execution at every step. This execution model introduces severe latency bottlenecks. To address this problem, we propose {PASTE}, a Pattern-Aware Speculative Tool Execution method designed to hide tool latency through speculation. {PASTE} is based on the insight that although agent requests are semantically diverse, they exhibit stable application level control flows (recurring tool-call sequences) and predictable data dependencies (parameter passing between tools). By exploiting these properties, {PASTE} improves agent serving performance through speculative tool execution. Experimental results against state of the art baselines show that {PASTE} reduces average task completion time by 48.5\% and improves tool execution throughput by 1.8x.},
+	number = {{arXiv}:2603.18897},
+	publisher = {{arXiv}},
+	author = {Sui, Yifan and Zhao, Han and Ma, Rui and He, Zhiyuan and Wang, Hao and Li, Jianxun and Yang, Yuqing},
+	urldate = {2026-03-31},
+	date = {2026-03-19},
+	year = {2026},
+	eprinttype = {arxiv},
+	eprint = {2603.18897 [cs]},
+	note = {version: 1},
+	keywords = {Computer Science - Artificial Intelligence, Computer Science - Distributed, Parallel, and Cluster Computing},
+	file = {Full Text PDF:/Users/huajunbai/Zotero/storage/X28W938G/Sui 等 - 2026 - Act While Thinking Accelerating LLM Agents via Pattern-Aware Speculative Tool Execution.pdf:application/pdf;Snapshot:/Users/huajunbai/Zotero/storage/6UL8QLP2/2603.html:text/html},
+}
+
+@misc{nichols_optimizing_2025,
+	title = {Optimizing Agentic Language Model Inference via Speculative Tool Calls},
+	url = {http://arxiv.org/abs/2512.15834},
+	doi = {10.48550/arXiv.2512.15834},
+	abstract = {Language models ({LMs}) are becoming increasingly dependent on external tools. {LM}-based agentic frameworks frequently interact with their environment via such tools to search files, run code, call {APIs}, etc. Further, modern reasoning-based {LMs} use tools such as web search and Python code execution to enhance their reasoning capabilities. While tools greatly improve the capabilities of {LMs}, they also introduce performance bottlenecks during the inference process. In this paper, we introduce novel systems optimizations to address such performance bottlenecks by speculating tool calls and forcing sequences to remain resident in the inference engine to minimize overheads. Our optimizations lead to throughput improvements of several hundred tokens per second when hosting inference for {LM} agents. We provide a theoretical analysis of our algorithms to provide insights into speculation configurations that will yield the best performance. Further, we recommend a new "tool cache" {API} endpoint to enable {LM} providers to easily adopt these optimizations.},
+	number = {{arXiv}:2512.15834},
+	publisher = {{arXiv}},
+	author = {Nichols, Daniel and Singhania, Prajwal and Jekel, Charles and Bhatele, Abhinav and Menon, Harshitha},
+	urldate = {2026-03-31},
+	date = {2025-12-17},
+	year = {2025},
+	eprinttype = {arxiv},
+	eprint = {2512.15834 [cs]},
+	keywords = {Computer Science - Artificial Intelligence, Computer Science - Distributed, Parallel, and Cluster Computing, Computer Science - Performance, Computer Science - Programming Languages, Computer Science - Software Engineering},
+	file = {Full Text PDF:/Users/huajunbai/Zotero/storage/GDIN46DY/Nichols 等 - 2025 - Optimizing Agentic Language Model Inference via Speculative Tool Calls.pdf:application/pdf;Snapshot:/Users/huajunbai/Zotero/storage/7QEW4R9U/2512.html:text/html},
+}
+
+@misc{huang_reducing_2025,
+	title = {Reducing Latency of {LLM} Search Agent via Speculation-based Algorithm-System Co-Design},
+	url = {http://arxiv.org/abs/2511.20048},
+	doi = {10.48550/arXiv.2511.20048},
+	abstract = {{LLM}-based search agents achieve strong performance but suffer from severe latency, as each step requires serialized {LLM} reasoning followed by action of tool execution. We revisit this bottleneck through the lens of speculation. While traditional predict-verify speculation paradigm can break serial execution, its benefit remains limited, as it retains the full original workload and adds extra inference overhead. We observe that early agent steps often involve simple evidence-gathering, where correct actions can often be predicted without full reasoning. Building on these observations, we present {SPAgent}, an algorithm-system co-design framework that expands the role of speculation in search agents to reduce latency. Algorithmically, {SPAgent} introduces a two-phase adaptive speculation mechanism that selectively omits verification when safe. System-wise, a two-level scheduler regulates speculative requests based on engine load to ensure speculation remains beneficial. We implement {SPAgent} in real-world systems. Across extensive experimental settings, {SPAgent} achieves up to \$1.65{\textbackslash}times\$ end-to-end speedup while maintaining same or even achieving higher accuracy, enabling practical deployment of multi-step search agents.},
+	number = {{arXiv}:2511.20048},
+	publisher = {{arXiv}},
+	author = {Huang, Zixiao and Zeng, Wen and Fu, Tianyu and Liu, Tengxuan and Sun, Yizhou and Hong, Ke and Yang, Xinhao and Liu, Chengchun and Li, Yan and Zhang, Quanlu and Dai, Guohao and Zhu, Zhenhua and Wang, Yu},
+	urldate = {2026-03-31},
+	date = {2025-11-25},
+	year = {2025},
+	eprinttype = {arxiv},
+	eprint = {2511.20048 [cs]},
+	keywords = {Computer Science - Artificial Intelligence, Computer Science - Machine Learning, Computer Science - Performance},
+	file = {Full Text PDF:/Users/huajunbai/Zotero/storage/4JLJ4F8G/Huang 等 - 2025 - Reducing Latency of LLM Search Agent via Speculation-based Algorithm-System Co-Design.pdf:application/pdf;Snapshot:/Users/huajunbai/Zotero/storage/LMD7IM5N/2511.html:text/html},
+}
+
+@article{ye_speculative_2026,
+	title = {Speculative Actions: A Lossless Framework for Faster Agentic Systems},
+	abstract = {{AI} agents are increasingly deployed in complex, interactive environments, yet their runtime remains a major bottleneck for training, evaluation, and real-world use. Typical agent behavior unfolds sequentially, where each action requires an {API} call that can incur substantial latency. For example, a game of chess between two state-of-the-art agents can take hours. We introduce speculative actions, a lossless acceleration framework for general agentic systems. Inspired by speculative execution in microprocessors and speculative decoding in {LLM} inference, our method uses faster models to predict likely future actions and executes them in parallel, committing only when predictions match. We evaluate speculative actions across gaming, e-commerce, and web search environments, and additionally study a lossy extension in an operating systems setting. Across domains, we achieve up to 55\% next-action prediction accuracy, translating into substantial latency reductions. Finally, we present a cost–latency analysis that formalizes the tradeoff between speculative breadth and time savings. This analysis enables principled tuning and selective branch launching, to ensure multi-branch speculation delivers practical speedups without prohibitive cost growth.},
+	author = {Ye, Naimeng and Ahuja, Arnav and Liargkovas, Georgios and Lu, Yunan and Kaffes, Kostis and Peng, Tianyi},
+	date = {2026},
+	year = {2026},
+	langid = {english},
+	file = {PDF:/Users/huajunbai/Zotero/storage/7YCRD7VY/Ye 等 - 2026 - Speculative Actions A Lossless Framework for Faster Agentic Systems.pdf:application/pdf},
+}
+
+@misc{zhong_dualspec_2026,
+	title = {{DualSpec}: Accelerating Deep Research Agents via Dual-Process Action Speculation},
+	url = {http://arxiv.org/abs/2603.07416},
+	doi = {10.48550/arXiv.2603.07416},
+	shorttitle = {{DualSpec}},
+	abstract = {Large language model-based deep research agents have been increasingly popular for addressing long-horizon information-seeking tasks, but they often incur high end-to-end latency due to extensive reasoning and frequent tool use. Speculation frameworks aim to reduce latency by overlapping action execution with reasoning; however, existing approaches typically rely on uniform speculation strategies and strict action matching, which limits inference speedups and robustness. In this work, we revisit the speculate-verify paradigm for deep research agents through the lens of action heterogeneity. We show that {\textbackslash}textit\{Search\} and {\textbackslash}textit\{Visit\} actions exhibit fundamentally different reasoning and model capacity requirements: entropy-based analysis reveals that Search decisions have higher uncertainty and benefit significantly from explicit reasoning, whereas Visit decisions have lower entropy and depend primarily on model capacity. Motivated by this dual-process characteristic, we propose {DualSpec}, a heterogeneous speculation framework equipped with a lightweight, confidence-based semantic verifier. Experiments across multiple models and benchmarks demonstrate that {DualSpec} achieves up to 3.28\${\textbackslash}times\$ end-to-end speedup while maintaining accuracy comparable to fully reasoning agents.},
+	number = {{arXiv}:2603.07416},
+	publisher = {{arXiv}},
+	author = {Zhong, Shuzhang and Lu, Baotong and Chen, Qi and Liu, Chuanjie and Yang, Fan and Li, Meng},
+	urldate = {2026-03-31},
+	date = {2026-03-08},
+	year = {2026},
+	eprinttype = {arxiv},
+	eprint = {2603.07416 [cs]},
+	keywords = {Computer Science - Machine Learning},
+	file = {Full Text PDF:/Users/huajunbai/Zotero/storage/9DPB3U9E/Zhong 等 - 2026 - DualSpec Accelerating Deep Research Agents via Dual-Process Action Speculation.pdf:application/pdf;Snapshot:/Users/huajunbai/Zotero/storage/84J74IIU/2603.html:text/html},
+}
+
+@misc{mohammadi_atomix_2026,
+	title = {Atomix: Timely, Transactional Tool Use for Reliable Agentic Workflows},
+	url = {http://arxiv.org/abs/2602.14849},
+	doi = {10.48550/arXiv.2602.14849},
+	shorttitle = {Atomix},
+	abstract = {{LLM} agents increasingly act on external systems, yet tool effects are immediate. Under failures, speculation, or contention, losing branches can leak unintended side effects with no safe rollback. We introduce Atomix, a runtime that provides progress-aware transactional semantics for agent tool calls. Atomix tags each call with an epoch, tracks per-resource frontiers, and commits only when progress predicates indicate safety; bufferable effects can be delayed, while externalized effects are tracked and compensated on abort. Across real workloads with fault injection, transactional retry improves task success, while frontier-gated commit strengthens isolation under speculation and contention.},
+	number = {{arXiv}:2602.14849},
+	publisher = {{arXiv}},
+	author = {Mohammadi, Bardia and Potamitis, Nearchos and Klein, Lars and Arora, Akhil and Bindschaedler, Laurent},
+	urldate = {2026-03-31},
+	date = {2026-02-16},
+	year = {2026},
+	eprinttype = {arxiv},
+	eprint = {2602.14849 [cs]},
+	keywords = {Computer Science - Artificial Intelligence, Computer Science - Distributed, Parallel, and Cluster Computing, Computer Science - Machine Learning, Computer Science - Multiagent Systems},
+	file = {Preprint PDF:/Users/huajunbai/Zotero/storage/C9DJ3NUT/Mohammadi 等 - 2026 - Atomix Timely, Transactional Tool Use for Reliable Agentic Workflows.pdf:application/pdf;Snapshot:/Users/huajunbai/Zotero/storage/E3N2ZE8C/2602.html:text/html},
+}
+
+@inproceedings{kwon_efficient_2023,
+	title = {Efficient Memory Management for Large Language Model Serving with {PagedAttention}},
+	booktitle = {Proceedings of the 29th Symposium on Operating Systems Principles},
+	author = {Kwon, Woosuk and Li, Zhuohan and Zhuang, Siyuan and Sheng, Ying and Zheng, Lianmin and Yu, Cody Hao and Gonzalez, Joseph E. and Zhang, Hao and Stoica, Ion},
+	year = {2023},
+	pages = {611--626},
+}
+
+@inproceedings{leviathan_fast_2023,
+	title = {Fast Inference from Transformers via Speculative Decoding},
+	booktitle = {International Conference on Machine Learning},
+	author = {Leviathan, Yaniv and Kalman, Matan and Matias, Yossi},
+	year = {2023},
+	pages = {19274--19286},
+}
+
+@article{li_eagle_2024,
+	title = {{EAGLE}: Speculative Sampling Requires Rethinking Feature Uncertainty},
+	author = {Li, Yuhui and Wei, Fangyun and Zhang, Chao and Zhang, Hongyang},
+	journal = {International Conference on Machine Learning},
+	year = {2024},
+}
+
+@article{cai_medusa_2024,
+	title = {Medusa: Simple {LLM} Inference Acceleration Framework with Multiple Decoding Heads},
+	author = {Cai, Tianle and Li, Yuhong and Geng, Zhengyang and Peng, Hongwu and Lee, Jason D. and Chen, Deming and Dao, Tri},
+	journal = {International Conference on Machine Learning},
+	year = {2024},
+}
+
+@inproceedings{zheng_sglang_2024,
+	title = {{SGLang}: Efficient Execution of Structured Language Model Programs},
+	author = {Zheng, Lianmin and Yin, Liangsheng and Xie, Zhiqiang and Huang, Jeff and Sun, Chuyue and Yu, Cody Hao and Cao, Shiyi and Kober, Christos and Sheng, Ying and Gonzalez, Joseph E. and Stoica, Ion and Zhang, Hao},
+	booktitle = {Advances in Neural Information Processing Systems},
+	year = {2024},
+}
+
+@inproceedings{yang_hotpotqa_2018,
+	title = {{HotpotQA}: A Dataset for Diverse, Explainable Multi-hop Question Answering},
+	booktitle = {Conference on Empirical Methods in Natural Language Processing},
+	author = {Yang, Zhilin and Qi, Peng and Zhang, Saizheng and Bengio, Yoshua and Cohen, William W. and Salakhutdinov, Ruslan and Manning, Christopher D.},
+	year = {2018},
+}
+
+@inproceedings{ho_constructing_2020,
+	title = {Constructing A Multi-hop {QA} Dataset for Comprehensive Evaluation of Reasoning Steps},
+	booktitle = {International Conference on Computational Linguistics},
+	author = {Ho, Xanh and Nguyen, Anh-Khoa Duong and Sugawara, Saku and Aizawa, Akiko},
+	year = {2020},
+}
+
+@inproceedings{joshi_triviaqa_2017,
+	title = {{TriviaQA}: A Large Scale Distantly Supervised Challenge Dataset for Reading Comprehension},
+	booktitle = {Annual Meeting of the Association for Computational Linguistics},
+	author = {Joshi, Mandar and Choi, Eunsol and Weld, Daniel S. and Zettlemoyer, Luke},
+	year = {2017},
+}
+
+@article{patil_gorilla_2023,
+	title = {Gorilla: Large Language Model Connected with Massive {APIs}},
+	author = {Patil, Shishir G. and Zhang, Tianjun and Wang, Xin and Gonzalez, Joseph E.},
+	journal = {arXiv preprint arXiv:2305.15334},
+	year = {2023},
+}
+
+% ============================================================
+% New references added 2026-04-05 (targeting 25-30 total)
+% ============================================================
+
+@inproceedings{yao_react_2023,
+	title = {{ReAct}: Synergizing Reasoning and Acting in Language Models},
+	booktitle = {International Conference on Learning Representations},
+	author = {Yao, Shunyu and Zhao, Jeffrey and Yu, Dian and Du, Nan and Shafran, Izhak and Narasimhan, Karthik and Cao, Yuan},
+	year = {2023},
+}
+
+@article{schick_toolformer_2024,
+	title = {Toolformer: Language Models Can Teach Themselves to Use Tools},
+	author = {Schick, Timo and Dwivedi-Yu, Jane and Dess{\`i}, Roberto and Raileanu, Roberta and Lomeli, Maria and Hambro, Eric and Zettlemoyer, Luke and Cancedda, Nicola and Scialom, Thomas},
+	journal = {Advances in Neural Information Processing Systems},
+	volume = {36},
+	year = {2024},
+}
+
+@article{qin_toolllm_2024,
+	title = {{ToolLLM}: Facilitating Large Language Models to Master 16000+ Real-world {APIs}},
+	author = {Qin, Yujia and Liang, Shihao and Ye, Yining and Zhu, Kunlun and Yan, Lan and Lu, Yaxi and Lin, Yankai and Cong, Xin and Tang, Xiangru and Qian, Bill and others},
+	journal = {International Conference on Learning Representations},
+	year = {2024},
+}
+
+@inproceedings{li_apibank_2023,
+	title = {{API-Bank}: A Comprehensive Benchmark for Tool-Augmented {LLMs}},
+	booktitle = {Conference on Empirical Methods in Natural Language Processing},
+	author = {Li, Minghao and Song, Feifan and Yu, Bowen and Yu, Haiyang and Li, Zhoujun and Huang, Fei and Li, Yongbin},
+	year = {2023},
+}
+
+@article{jimenez_swebench_2024,
+	title = {{SWE-bench}: Can Language Models Resolve Real-World {GitHub} Issues?},
+	author = {Jimenez, Carlos E. and Yang, John and Wettig, Alexander and Yao, Shunyu and Pei, Kexin and Press, Ofir and Narasimhan, Karthik},
+	journal = {International Conference on Learning Representations},
+	year = {2024},
+}
+
+@article{zhuang_toolqa_2024,
+	title = {{ToolQA}: A Dataset for {LLM} Question Answering with External Tools},
+	author = {Zhuang, Yuchen and Yu, Yue and Wang, Kuan and Sun, Haotian and Zhang, Chao},
+	journal = {Advances in Neural Information Processing Systems},
+	volume = {36},
+	year = {2024},
+}
+
+@article{wang_survey_2024,
+	title = {A Survey on Large Language Model based Autonomous Agents},
+	author = {Wang, Lei and Ma, Chen and Feng, Xueyang and Zhang, Zeyu and Yang, Hao and Zhang, Jingsen and Chen, Zhiyuan and Tang, Jiakai and Chen, Xu and Lin, Yankai and others},
+	journal = {Frontiers of Computer Science},
+	volume = {18},
+	number = {6},
+	year = {2024},
+}
+
+@misc{cheng_fast_2025,
+	title = {Fast {LLM} Post-training via Decoupled and Fastest-of-N Speculation},
+	url = {http://arxiv.org/abs/2511.16193},
+	doi = {10.48550/arXiv.2511.16193},
+	abstract = {Rollout dominates the training time in large language model ({LLM}) post-training, where the trained model is used to generate tokens given a batch of prompts. This work, {SpecActor}, achieves fast rollout with speculative decoding that deploys a fast draft path to accelerate the unparallelizable generation, while the correctness is guaranteed by fast parallel verification of the outputs with the original model. {SpecActor} addresses two foundational challenges that hinder speculation efficiency: (1) a Decoupled speculation method that overcomes the computation inefficiency issue when executing speculative decoding with relative large per-worker batch size -- a common configuration in training but unfriendly to speculation, and (2) a Fastest-of-N speculation method that selects and combines different draft methods according to the rollout progress to approximate the optimal draft method even when the best one is unknown a priori. Extensive evaluations on production traces show that {SpecActor} accelerates mean rollout speed by 2.0--2.4x, with up to 2.7x speedup, over common post-training baselines. The results are consistent across both dense and {MoE} models and across different {RL} algorithms. Notably, {SpecActor} is 1.1--2.6x faster compared to vanilla speculative rollout in different traces. The accelerated rollout achieves 1.4--2.3x faster end-to-end training time.},
+	number = {{arXiv}:2511.16193},
+	publisher = {{arXiv}},
+	author = {Cheng, Rongxin and Zhou, Kai and Wei, Xingda and Liu, Siyuan and Han, Mingcong and Ai, Mingjing and Zhou, Yeju and Zhong, Baoquan and Xiao, Wencong and Chen, Rong and Chen, Haibo},
+	urldate = {2026-03-31},
+	date = {2025-12-23},
+	eprinttype = {arxiv},
+	eprint = {2511.16193 [cs]},
+	keywords = {Computer Science - Artificial Intelligence, Computer Science - Distributed, Parallel, and Cluster Computing},
+	file = {Preprint PDF:/Users/huajunbai/Zotero/storage/5V9QM26V/Cheng 等 - 2025 - Fast LLM Post-training via Decoupled and Fastest-of-N Speculation.pdf:application/pdf;Snapshot:/Users/huajunbai/Zotero/storage/B4FT5M7V/2511.html:text/html},
+}
