@@ -20,3 +20,27 @@ A: Agree, current wording is too empty. The point should be: `parallel tool call
 4. page 3 
 I think current illustration figure is too large (takes a lot of space)
 we could've used Figure 2 overview here to illustrate the point.
+
+5. page 7 the bottom left formula can be removed, I think it serves the same purpose as page 8 formula, but page 8 formula looks better. and it should be made larger across left to right.
+
+v7 feedbacks
+keep only English subtitles/headers, remove Chinese parts
+page 2 and page 4:
+1) I think we can remove right part figure from page 2, it kind of deliver same message as page 4 figure
+2) maybe we can combine page 2 and page 4, move page 3 as new page 2, (2+4) becomes new page 3
+and we can start with not evidence from related work, but just call it evidence for tool stall (or better name if you can come up with). Then the next illustration figure should explain why tool time occupies such long time and the 3 problems
+3) page 5 feels can be reduced as well, it doesn't have enough content for one page. maybe use 2+4+5 into new page 3
+
+page 3: 
+1) PASTE should include institutes
+2) in slides notes (do we have it?) explain what composes tool init time in Chinese
+
+page 6:
+big rendering issue, black and short. I don't know what happened
+
+page 8:
+as I said before, try to use the screenshotted formula instead of printing out the formula in html
+doesn't look good
+
+Discussions:
+in discussion, we can highlight what other related works do? like PASTE, or DuelSpec? what are the key takeaways?
