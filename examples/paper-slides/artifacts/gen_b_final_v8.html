@@ -335,7 +335,10 @@ strong{color:#111;font-weight:700}
   第8页 | ~2.5 min
   - engine-side 是在 client-side 基础上再往前走一步，提出三个优化方向。
   - O1（主要收益来源）：和 client-side 一样，把工具执行隐藏在主模型 reasoning 过程中。区别在于 client 把 speculated 结果 POST 到引擎的 tool cache 里。这是 engine-side 收益的最大贡献者。
-  - O2（early exit）：如果工具在 reasoning 结束前就返回，引擎可以验证并跳过剩余 decode。但条件苛刻——工具必须比 reasoning 更快。
+  - O2（early exit）要这样理解：正常情况下，主模型会继续把这一轮 reasoning token 一直 decode 到真正输出 tool call 为止，然后才停下来等工具。
+  - 如果 speculative tool 在这段 reasoning 还没结束时就先返回了，引擎已经拿到了候选 tool result；这时一旦确认当前轨迹和 speculated tool call 一致，就可以直接结束后面那一小段“为了把 tool call token 一个个吐出来而继续做的 decode”。
+  - 所以 early exit 省掉的不是整个 tool wait，而是 reasoning 尾部那段“本来还要继续 decode，直到正式吐出 tool call”的时间。
+  - 这也是为什么 O2 通常不是主要收益来源：它要求工具足够快，快到能在主模型还在想、还没正式吐出 tool call 之前就回来。
   - O3（avoid eviction）：命中时把结果拼到 KV cache 上，请求不出 batch。但在高并发下 KV cache 容量本身是瓶颈，eviction 照样发生。
   - 指向时间线图时说："三步都围绕同一件事——减少工具调用对推理链路的打断。"
   - 展示底部的 Tool Cache API code：provider 只需要实现这一个 POST 接口就够了，接口非常轻量。
@@ -636,7 +639,9 @@ strong{color:#111;font-weight:700}
   第17页 | ~2 min
   - 每个问题读完后停顿一下，给听众思考和讨论空间，这是互动环节不是单向讲述。
   - Q1（最适合的场景）：工具调用频繁且工具 latency 和主模型生成时间同量级；代码 agent、检索 agent、经常 read file / web search 的 SWE agent 是理想场景。
-  - Q2（有副作用的工具）：不能直接套现在这套方法，要么限制只用于 stateless 工具，要么引入 rollback / transaction 语义，这是更重的 systems problem，是有意思的未来方向。
+  - Q2（有副作用的工具）：这里可以先把 stateless / stateful 讲具体。stateless tools 是读操作，不改变外部世界，比如 search、read_file、retrieve；猜错了最多浪费一次调用。
+  - stateful tools 则会改状态，比如 send_email、place_order、write_db、delete_file、post_message；如果你提前 speculative 执行了，哪怕后面发现模型其实不该这么调，副作用也已经发生了。
+  - 所以这类工具不能直接套现在这套方法，要么限制只用于 stateless 工具，要么引入 rollback / transaction 语义，这是更重的 systems problem，是有意思的未来方向。
   - Q3（simulated latency）：这是这篇 paper 比较大的一个弱点——所有实验都不是真实工具执行，工具输出是预计算的，延迟是手动注入的正态分布。作者的辩护是"这个优化只关心 timing 不关心内容"，但这意味着他们的 engine-side 端到端系统从来没有在真实工具上完整跑通过。21% 的最佳收益出现在 tool latency = 2.0-2.5s 的极端假设下，实际常见工具（ls、read_file、web_search）大多在 0.5-1.5s 内。另外，工具延迟在真实场景下通常是 long-tail 分布，不是正态。这些都需要留意。
   -->
 </div>
